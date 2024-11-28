@@ -1,6 +1,7 @@
 #include <xinu.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 /* Estados possíveis do micro-ondas */
 #define MICROONDAS_LIVRE 0
@@ -21,6 +22,7 @@ void emitir_bip();
 void controlar_luz(bool estado);
 void especificar_ciclo(int32 prato);
 void acionar_emergencia();
+void exibir_relogio_cortesia();
 
 /* Funções específicas para pratos */
 void preparar_carnes();
@@ -40,11 +42,6 @@ process main(void)
     resume(create(controlar_microondas, 1024, 20, "controlar_microondas", 0));
 
     int32 opcao = -1;
-	if (scanf("%d", &opcao) != 1) {
-	printf("Erro ao ler entrada. Tente novamente.\n");
-	while(getchar() != '\n'); 
-}
-
     while (TRUE) {
         printf("\n=== Menu Micro-ondas ===\n");
         printf("1. Inserir comida\n");
@@ -137,6 +134,7 @@ void controlar_microondas() {
         switch (estado_microondas) {
             case MICROONDAS_LIVRE:
                 printf("Estado do micro-ondas: LIVRE\n");
+                exibir_relogio_cortesia();  // Exibe a hora atual quando livre
                 break;
             case MICROONDAS_OCUPADO:
                 printf("Estado do micro-ondas: OCUPADO\n");
@@ -222,4 +220,16 @@ void acionar_emergencia() {
     estado_microondas = MICROONDAS_LIVRE;
     controlar_luz(false);
     signal(mutex);
+}
+
+void exibir_relogio_cortesia() {
+    // Exibe a hora atual do sistema
+    struct tm *tm_info;
+    char buffer[26];
+    time_t timer;
+
+    time(&timer);
+    tm_info = localtime(&timer);
+    strftime(buffer, 26, "Hora atual: %H:%M:%S", tm_info);
+    printf("%s\n", buffer);
 }
